@@ -39,9 +39,13 @@ jobs:
         run: |
           EVENT_NAME="${{ github.event_name }}"
 
-          # push 到 main 分支，编译全部变体
+          # push 到 main 分支，仅编译指定的 4 个变体
           if [[ "$EVENT_NAME" == "push" ]]; then
-            echo "variants=$ALL_VARIANTS" >> $GITHUB_OUTPUT
+            # 在下面这个数组里填入你需要编译的板子名称
+            TARGETS='["bread-compact-wifi", "xingzhi-cube-1.54tft-wifi", "zhengchen-1.54tft-wifi", "v2.2.2_xingzhi-metal-1.54-wifi"]'
+            
+            FILTERED=$(echo "$ALL_VARIANTS" | jq -c --argjson t "$TARGETS" 'map(select(.board as $b | $t | index($b)))')
+            echo "variants=$FILTERED" >> $GITHUB_OUTPUT
             exit 0
           fi
 
